@@ -12,6 +12,7 @@ const dbConfig = {
 const pool = mysql.createPool(dbConfig);
 
 app.use(express.json());
+app.use(express.static('public'));
 
 async function initializeSampleData() {
   try {

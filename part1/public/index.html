@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dog of the Day</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    body {
+      background: #222;
+      color: #333;
+      font-family: Comic Sans MS, cursive, sans-serif;
+    }
+    .container {
+      margin: 50px;
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 200px;
+    }
+    .dog-details {
+      font-size: 2em;
+      background: #ff0;
+      color: #fff;
+      padding: 40px;
+      border-radius: 50px 0 50px 0;
+      box-shadow: 0 0 20px #f0f;
+      width: 400px;
+      text-align: right;
+    }
+    .dog-img {
+      border: 10px dashed #0ff;
+      width: 400px;
+      height: 400px;
+      object-fit: cover;
+      filter: blur(2px) grayscale(80%);
+    }
+    .fetch-btn {
+      font-size: 0.7em;
+      padding: 2px 6px;
+      margin-top: 10px;
+      background: #0f0;
+      color: #0ff;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      outline: none;
+    }
+    .fetch-btn:focus {
+      outline: 2px dotted #f00;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>Dog of the Day</h1>
+    <div class="container">
+      <div class="dog-details">
+        <div><b>Name:</b> Barky McBarkface</div>
+        <div><b>Breed:</b> Unknown</div>
+        <div><b>Age:</b> 3</div>
+        <div><b>Fun Fact:</b> Loves chasing his own tail!</div>
+        <button class="fetch-btn" @click="getDog">Fetch!</button>
+      </div>
+      <img class="dog-img" :src="dogUrl" />
+    </div>
+    <div style="margin-top: 100px; font-size: 0.8em; color: #888;">
+      <marquee>Dog of the Day! Dog of the Day! Dog of the Day!</marquee>
+    </div>
+  </div>
+  <script>
+    const { createApp } = Vue;
+    createApp({
+      data() {
+        return {
+          dogUrl: ''
+        }
+      },
+      methods: {
+        async getDog() {
+          const res = await fetch('https://dog.ceo/api/breeds/image/random');
+          const data = await res.json();
+          this.dogUrl = data.message;
+        }
+      },
+      mounted() {
+        this.getDog();
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
