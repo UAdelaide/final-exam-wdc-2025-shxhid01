@@ -9,6 +9,7 @@
 </head>
 <body class="bg-light">
   <div id="app" class="container py-4">
+    <button @click="logout" class="btn btn-outline-danger float-end mb-3">Logout</button>
     <h1 class="mb-4 text-primary">Owner Dashboard</h1>
 
     <!-- Walk request form -->
@@ -115,6 +116,15 @@
           }
         }
 
+        async function logout() {
+          await fetch('/api/users/logout', { method: 'POST' });
+          // Remove session cookie by setting it expired (for extra safety)
+          document.cookie.split(";").forEach(function(c) {
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+          });
+          window.location.href = "index.html";
+        }
+
         onMounted(() => {
           loadWalks();
         });
@@ -124,7 +134,8 @@
           walks,
           message,
           error,
-          submitWalkRequest
+          submitWalkRequest,
+          logout
         };
       }
     }).mount('#app');
