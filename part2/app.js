@@ -79,6 +79,25 @@ app.use('/api/users', userRoutes);
 
 const pool = require('./models/db');
 
+app.get('/api/dogs', async (req, res) => {
+  try {
+    const [rows] = await pool.execute(`
+      SELECT 
+        d.dog_id,
+        d.name,
+        d.size,
+        d.owner_id
+      FROM Dogs d
+      ORDER BY d.name
+    `);
+
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching dogs:', error);
+    res.status(500).json({ error: 'Failed to fetch dogs' });
+  }
+});
+
 app.get('/api/owner/dogs', async (req, res) => {
   try {
     if (!req.session.user || req.session.user.role !== 'owner') {

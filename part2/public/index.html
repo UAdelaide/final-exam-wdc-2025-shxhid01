@@ -26,6 +26,44 @@
       <button type="submit" class="btn btn-primary">Log In</button>
     </form>
 
+    <div class="mt-5">
+      <h2 class="mb-3">Registered Dogs</h2>
+      <div v-if="loadingDogs" class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      <div v-else-if="dogsError" class="alert alert-danger">{{ dogsError }}</div>
+      <div v-else-if="dogs.length === 0" class="alert alert-info">No dogs registered yet.</div>
+      <div v-else class="table-responsive">
+        <table class="table table-striped table-hover">
+          <thead class="table-primary">
+            <tr>
+              <th>Dog ID</th>
+              <th>Name</th>
+              <th>Size</th>
+              <th>Owner ID</th>
+              <th>Photo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="dog in dogs" :key="dog.dog_id">
+              <td>{{ dog.dog_id }}</td>
+              <td>{{ dog.name }}</td>
+              <td>{{ dog.size }}</td>
+              <td>{{ dog.owner_id }}</td>
+              <td>
+                <img v-if="dog.photo" :src="dog.photo" alt="Dog photo" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
+                <div v-else class="spinner-border spinner-border-sm" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <a href="owner-dashboard.html" class="btn btn-outline-primary me-2">Owner Dashboard</a>
     <a href="walker-dashboard.html" class="btn btn-outline-success">Walker Dashboard</a>
   </div>
@@ -38,8 +76,14 @@
           message: 'Welcome to the Dog Walking Service!',
           username: '',
           password: '',
-          error: ''
+          error: '',
+          dogs: [],
+          loadingDogs: true,
+          dogsError: ''
         };
+      },
+      mounted() {
+        this.fetchDogs();
       },
       methods: {
         async login() {
@@ -52,7 +96,6 @@
             });
             const result = await res.json();
             if (!res.ok) throw new Error(result.error || 'Login failed');
-            // Redirect based on role
             if (result.user.role === 'owner') {
               window.location.href = 'owner-dashboard.html';
             } else if (result.user.role === 'walker') {
@@ -62,6 +105,48 @@
             }
           } catch (err) {
             this.error = err.message;
+          }
+        },
+        async fetchDogs() {
+          this.loadingDogs = true;
+          this.dogsError = '';
+          try {
+            const mockDogs = [
+              { dog_id: 1, name: 'Max', size: 'medium', owner_id: 1 },
+              { dog_id: 2, name: 'Bella', size: 'small', owner_id: 2 },
+              { dog_id: 3, name: 'Rocky', size: 'large', owner_id: 5 },
+              { dog_id: 4, name: 'Charlie', size: 'medium', owner_id: 1 },
+              { dog_id: 5, name: 'Lucy', size: 'small', owner_id: 2 },
+              { dog_id: 6, name: 'Buddy', size: 'large', owner_id: 5 },
+              { dog_id: 7, name: 'Daisy', size: 'medium', owner_id: 1 },
+              { dog_id: 8, name: 'Molly', size: 'small', owner_id: 2 }
+            ];
+
+            const dogPromises = mockDogs.map(dog => this.fetchDogImage(dog));
+            const dogs = await Promise.all(dogPromises);
+
+            this.dogs = dogs;
+          } catch (err) {
+            console.error('Error fetching dogs:', err);
+            this.dogsError = err.message;
+          } finally {
+            this.loadingDogs = false;
+          }
+        },
+        async fetchDogImage(dog) {
+          try {
+            const res = await fetch('https://dog.ceo/api/breeds/image/random');
+            const data = await res.json();
+
+            console.log('Dog API response:', data);
+
+            if (data.status === 'success') {
+              dog.photo = data.message;
+            }
+            return dog;
+          } catch (err) {
+            console.error('Error fetching dog image:', err);
+            return dog;
           }
         }
       }
