@@ -56,4 +56,42 @@ router.post('/:id/apply', async (req, res) => {
   }
 });
 
+router.post('/apply', async (req, res) => {
+    try {
+        const { walkId, walkerId } = req.body;
+
+        if (!req.session.userId || req.session.userId !== walkerId) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+
+        const [walk] = await pool.query(
+            'SELECT * FROM walks WHERE id = ?',
+            [walkId]
+        );
+
+        if (!walk || walk.length === 0) {
+            return res.status(404).json({ error: 'Walk not found' });
+        }
+
+        const [existingApplication] = await pool.query(
+            'SELECT * FROM walk_applications WHERE walk_id = ? AND walker_id = ?',
+            [walkId, walkerId]
+        );
+
+        if (existingApplication && existingApplication.length > 0) {
+            return res.status(400).json({ error: 'Already applied to this walk' });
+        }
+
+        await pool.query(
+            'INSERT INTO walk_applications (walk_id, walker_id, status, applied_at) VALUES (?, ?, ?, NOW())',
+            [walkId, walkerId, 'pending']
+        );
+
+        res.status(201).json({ message: 'Successfully applied for walk' });
+    } catch (error) {
+        console.error('Error applying for walk:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 module.exports = router;

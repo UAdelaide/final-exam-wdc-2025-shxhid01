@@ -1,5 +1,6 @@
 const express = require('express');
 const mysql = require('mysql2/promise');
+const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -13,6 +14,11 @@ const pool = mysql.createPool(dbConfig);
 
 app.use(express.json());
 app.use(express.static('public'));
+app.use(session({
+  secret: 'dogwalksecret',
+  resave: false,
+  saveUninitialized: false
+}));
 
 async function initializeSampleData() {
   try {
@@ -31,14 +37,24 @@ async function initializeSampleData() {
       INSERT IGNORE INTO Dogs (dog_id, owner_id, name, size) VALUES
       (1, 1, 'Max', 'medium'),
       (2, 2, 'Bella', 'small'),
-      (3, 5, 'Rocky', 'large')
+      (3, 5, 'Rocky', 'large'),
+      (4, 1, 'Charlie', 'medium'),
+      (5, 2, 'Lucy', 'small'),
+      (6, 5, 'Buddy', 'large'),
+      (7, 1, 'Daisy', 'medium'),
+      (8, 2, 'Molly', 'small')
     `);
     
     await connection.execute(`
       INSERT IGNORE INTO WalkRequests (request_id, dog_id, requested_time, duration_minutes, location, status) VALUES
       (1, 1, '2025-06-10 08:00:00', 30, 'Parklands', 'open'),
       (2, 2, '2025-06-11 10:00:00', 45, 'City Park', 'completed'),
-      (3, 3, '2025-06-12 14:00:00', 60, 'Beach Walk', 'open')
+      (3, 3, '2025-06-12 14:00:00', 60, 'Beach Walk', 'open'),
+      (4, 4, '2025-06-13 09:00:00', 30, 'Downtown', 'open'),
+      (5, 5, '2025-06-14 11:00:00', 45, 'River Side', 'completed'),
+      (6, 6, '2025-06-15 16:00:00', 60, 'Forest Trail', 'open'),
+      (7, 7, '2025-06-16 07:30:00', 30, 'Hillside', 'open'),
+      (8, 8, '2025-06-17 12:00:00', 45, 'Lakeside', 'completed')
     `);
     
     await connection.execute(`

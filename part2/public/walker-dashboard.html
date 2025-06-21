@@ -100,5 +100,56 @@
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+async function getCurrentUser() {
+    try {
+        const response = await fetch('/api/users/me', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch current user');
+        }
+
+        const userData = await response.json();
+        return userData.id;
+    } catch (error) {
+        console.error('Error fetching current user:', error);
+        throw error;
+    }
+}
+
+async function applyToWalk(walkId) {
+    try {
+        const walkerId = await getCurrentUser();
+        
+        const response = await fetch('/api/walks/apply', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                walkId: walkId,
+                walkerId: walkerId
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to apply for walk');
+        }
+
+        alert('Successfully applied for walk!');
+    } catch (error) {
+        console.error('Error applying to walk:', error);
+        alert(error.message);
+    }
+}
+</script>
 </body>
 </html>

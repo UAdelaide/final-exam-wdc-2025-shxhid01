@@ -1,0 +1,9 @@
+<label for="dog_id">Dog</label>
+<select name="dog_id" id="dog_id" required>
+    <option value="">-- Select a dog --</option>
+    <% if (dogs && dogs.length > 0) { %>
+        <% dogs.forEach(function(dog) { %>
+            <option value="<%= dog.dog_id %>"><%= dog.name %></option>
+        <% }); %>
+    <% } %>
+</select>
